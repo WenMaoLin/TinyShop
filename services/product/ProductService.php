@@ -43,7 +43,7 @@ class ProductService extends Service
             ->orderBy('rand()')
             ->select(['id', 'name', 'sketch', 'keywords', 'picture', 'view', 'star', 'price', 'market_price', 'cost_price', 'stock', 'real_sales', 'sales'])
             ->asArray()
-            ->limit($pages->limit)
+            ->limit(4)
             ->all();
 
         foreach ($models as &$model) {

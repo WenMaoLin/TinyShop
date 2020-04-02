@@ -22,7 +22,6 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="box-body table-responsive">
                 <?= GridView::widget([
                     'dataProvider' => $dataProvider,
-                    'filterModel' => $searchModel,
                     //重新定义分页样式
                     'tableOptions' => ['class' => 'table table-hover'],
                     'columns' => [
