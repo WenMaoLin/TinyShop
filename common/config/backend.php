@@ -168,6 +168,10 @@ return [
                     'title' => '站点帮助',
                     'route' => 'common/helper/index',
                 ],
+                [
+                    'title' => '视频矩阵管理',
+                    'route' => 'common/video/index',
+                ],
             ]
         ],
         [

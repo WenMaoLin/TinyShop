@@ -11,10 +11,9 @@ use addons\TinyShop\common\models\forms\ProductSearch;
 
 /**
  * 首页相关
- *
  * Class IndexController
  * @package addons\TinyShop\api\modules\v1\controllers
- * @author jianyan74 <751393839@qq.com>
+ * @author  jianyan74 <751393839@qq.com>
  */
 class IndexController extends OnAuthController
 {
@@ -22,10 +21,8 @@ class IndexController extends OnAuthController
 
     /**
      * 不用进行登录验证的方法
-     *
      * 例如： ['index', 'update', 'create', 'view', 'delete']
      * 默认全部需要验证
-     *
      * @var array
      */
     protected $authOptional = ['index'];
@@ -48,6 +45,7 @@ class IndexController extends OnAuthController
         $product_new = new ProductSearch();
         $product_new->is_new = StatusEnum::ENABLED;
 
+
         return [
             'search' => [
                 'hot_search_default' => $config['hot_search_default'] ?? '',
@@ -66,6 +64,7 @@ class IndexController extends OnAuthController
             'product_recommend' => Yii::$app->tinyShopService->product->getListBySearch($product_recommend), // 推荐
             'product_new' => Yii::$app->tinyShopService->product->getListBySearch($product_new), // 新品
             'guess_you_like' => Yii::$app->tinyShopService->product->getGuessYouLike($member_id), // 猜你喜欢
+            'video' => Yii::$app->tinyShopService->video->getIndexList(),//视频矩阵
             'config' => [
                 'web_site_icp' => $config['web_site_icp'] ?? '',
                 'copyright_companyname' => $config['copyright_companyname'] ?? '',

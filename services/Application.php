@@ -50,6 +50,7 @@ use common\components\Service;
  * @property \addons\TinyShop\services\pickup\PointService $pickupPoint 自提点
  * @property \addons\TinyShop\services\pickup\AuditorService $pickupAuditor 自提审核用户
  *
+ *
  * @author jianyan74 <751393839@qq.com>
  */
 class Application extends Service
@@ -103,5 +104,8 @@ class Application extends Service
         'nice' => 'addons\TinyShop\services\common\NiceService',
         'helper' => 'addons\TinyShop\services\common\HelperService',
         'adv' => 'addons\TinyShop\services\common\AdvService',
+
+        // 新增
+        'video' => 'addons\TinyShop\services\common\VideoService',
     ];
 }
