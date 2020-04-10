@@ -107,5 +107,6 @@ class Application extends Service
 
         // 新增
         'video' => 'addons\TinyShop\services\common\VideoService',
+        'store' => 'addons\TinyShop\services\common\StoreService',
     ];
 }
