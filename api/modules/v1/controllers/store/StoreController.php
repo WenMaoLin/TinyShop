@@ -32,8 +32,8 @@ class StoreController extends OnAuthController
     {
         $request = Yii::$app->request->get();
         $region = $request['region'];
-        $location = $request['location'];
-        return Yii::$app->tinyShopService->store->getRegionStore($region, $location);
+        $location = $request['location']; // GPS 坐标
+        return Yii::$app->tinyShopService->store->getRegionStoreGps($region, $location);
     }
 
 }
