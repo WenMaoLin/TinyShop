@@ -20,6 +20,7 @@ class AccessTokenGroupEnum extends BaseEnum
     const APP = 'tinyShopApp'; // app通用
     const H5 = 'tinyShopH5'; // H5
     const PC = 'tinyShopPc'; // Pc
+    const WECHAT_APP = 'tinyShopWechatApp'; // 微信
     const WECHAT = 'tinyShopWechat'; // 微信小程序
     const WECHAT_MQ = 'tinyShopWechatMq'; // 微信小程序
     const ALI_MQ = 'tinyShopAliMq'; // 支付宝小程序
@@ -41,6 +42,7 @@ class AccessTokenGroupEnum extends BaseEnum
             self::H5 => 'H5',
             self::PC => 'Pc',
             self::WECHAT => '微信',
+            self::WECHAT_APP => '微信',
             self::WECHAT_MQ => '微信小程序',
             self::ALI_MQ => '支付宝小程序',
             self::QQ_MQ => 'QQ小程序',

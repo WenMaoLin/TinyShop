@@ -3,6 +3,7 @@
 namespace addons\TinyShop\services\order;
 
 use addons\TinyShop\common\enums\AccessTokenGroupEnum;
+use addons\TinyShop\common\models\common\Voucher;
 use addons\TinyShop\common\models\product\Product;
 use common\helpers\BcHelper;
 use Yii;
@@ -34,7 +35,7 @@ use addons\TinyShop\common\models\marketing\Wholesale;
 /**
  * Class OrderService
  * @package addons\TinyShop\services\order
- * @author jianyan74 <751393839@qq.com>
+ * @author  jianyan74 <751393839@qq.com>
  */
 class OrderService extends \common\components\Service
 {
@@ -42,7 +43,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 创建订单
-     *
      * @param PreviewForm $previewForm
      * @return Order
      * @throws UnprocessableEntityHttpException
@@ -61,6 +61,14 @@ class OrderService extends \common\components\Service
         $order->buyer_ip = Yii::$app->request->userIP;
         $order->merchant_name = $config['title'] ?? '';
         $order->give_point_type = $config['shopping_back_points'] ?? 1;
+
+        //要是包含虚拟物品。把订单改成包含虚拟物品
+        foreach ($previewForm->orderProducts as $key => $value) {
+            if ($value['is_virtual'] == 1) {
+                $order->is_virtual = 1;
+                break;
+            }
+        }
 
         // 收货地址
         if ($address = $previewForm->address) {
@@ -125,9 +133,8 @@ class OrderService extends \common\components\Service
 
     /**
      * 支付
-     *
      * @param Order $order
-     * @param int $paymentType 支付类型
+     * @param int   $paymentType 支付类型
      * @throws UnprocessableEntityHttpException
      * @throws \yii\web\NotFoundHttpException
      */
@@ -150,6 +157,41 @@ class OrderService extends \common\components\Service
         $order->is_new_member = $this->findIsNewMember($order->buyer_id, $order->merchant_id);
         $order->pay_time = time();
 
+        //如果有虚拟物品
+        if ($order->is_virtual) {
+            //记录有多少个虚拟物品
+            $virtual_count = 0;
+            //遍历订单商品表
+            foreach ($order->product as $key => $value) {
+                if ($value->is_virtual == 1) {
+                    $virtual_count++;
+                    $product = $value->product;
+                    //为对应的商品创造卡券
+                    Yii::$app->tinyShopService->voucher->createByProduct($product, $value->member_id, $value->order_id, 0, $value->num);
+                }
+            }
+            //如果商品全都是虚拟物品
+            if($virtual_count == count($order->product)){
+                //订单状态改为已完成
+                $order->order_status = OrderStatusEnum::ACCOMPLISH;
+            }
+        }
+
+        //如果有上级，则给予父级余额奖励(佣金改为在核销时给予)
+//        $parent = Yii::$app->tinyShopService->member->findById($order->buyer_id)->parent;
+//        if ($parent) {
+//            //给予佣金
+//            Yii::$app->services->memberCreditsLog->incrMoney(new CreditsLogForm([
+//                'member' => $parent,
+//                'pay_type' => 0,
+//                'num' => $order->pay_money,
+//                'credit_group' => 'orderCreate',
+//                'remark' => "【系统】佣金",
+//                'map_id' => $order->id,
+//            ]));
+//        }
+
+//        throw new UnprocessableEntityHttpException('订单已支付，sb');
         $this->givePoint($order);
 
         // 验证是否拼团成功
@@ -169,10 +211,9 @@ class OrderService extends \common\components\Service
 
     /**
      * 关闭订单
-     *
-     * @param $id
+     * @param        $id
      * @param string $member_id
-     * @param bool $constraint 强制关闭不校验被处理
+     * @param bool   $constraint 强制关闭不校验被处理
      * @throws UnprocessableEntityHttpException
      * @throws \yii\web\NotFoundHttpException
      */
@@ -232,7 +273,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 发货
-     *
      * @param $id
      * @throws UnprocessableEntityHttpException
      * @throws \yii\web\NotFoundHttpException
@@ -258,8 +298,7 @@ class OrderService extends \common\components\Service
 
     /**
      * 确认收货
-     *
-     * @param $id
+     * @param        $id
      * @param string $member_id
      * @throws UnprocessableEntityHttpException
      * @throws \yii\web\NotFoundHttpException
@@ -309,7 +348,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 赠送积分
-     *
      * @param Order $model
      * @return bool
      * @throws UnprocessableEntityHttpException
@@ -370,7 +408,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 关闭订单
-     *
      * @param $config
      * @param $merchant_id
      * @throws UnprocessableEntityHttpException
@@ -397,13 +434,13 @@ class OrderService extends \common\components\Service
                 Yii::$app->tinyShopService->orderAction->create('自动关闭', $id, OrderStatusEnum::NOT_PAY, 0, '系统');
             }
         } catch (\Exception $e) {
-            p($e->getMessage());die();
+            p($e->getMessage());
+            die();
         }
     }
 
     /**
      * 关闭超时的拼团订单
-     *
      * @param $config
      * @param $merchant_id
      * @throws UnprocessableEntityHttpException
@@ -455,13 +492,13 @@ class OrderService extends \common\components\Service
             $closeIds = ArrayHelper::getColumn($orders, 'wholesale_id');
             !empty($closeIds) && Wholesale::updateAll(['state' => WholesaleStateEnum::FAILURE], ['in', 'id', $closeIds]);
         } catch (\Exception $e) {
-            p($e->getMessage());die();
+            p($e->getMessage());
+            die();
         }
     }
 
     /**
      * 完成全部订单
-     *
      * @param $config
      * @param $merchant_id
      */
@@ -490,7 +527,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 完成订单
-     *
      * @param Order $order
      * @throws \yii\web\NotFoundHttpException
      */
@@ -526,7 +562,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 自动更新订单的整体状态
-     *
      * @param $order_id
      * @throws UnprocessableEntityHttpException
      * @throws \yii\web\NotFoundHttpException
@@ -578,7 +613,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 完成评价
-     *
      * @param $order_id
      */
     public function evaluate($order_id)
@@ -746,8 +780,7 @@ class OrderService extends \common\components\Service
 
     /**
      * 查询并校验订单
-     *
-     * @param $id
+     * @param        $id
      * @param string $member_id
      * @return array|\yii\db\ActiveRecord|null|Order
      * @throws UnprocessableEntityHttpException
@@ -803,7 +836,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 获取订单数量
-     *
      * @return array|\yii\db\ActiveRecord[]
      */
     public function getOrderCountGroupByStatus()
@@ -821,7 +853,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 获取我的订单数量
-     *
      * @return array|\yii\db\ActiveRecord[]
      */
     public function getOrderCountGroupByMemberId($member_id)
@@ -865,7 +896,6 @@ class OrderService extends \common\components\Service
         }
 
 
-
         return $memberStatus;
     }
 
@@ -883,7 +913,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 获取最新的订单
-     *
      * @return array|\yii\db\ActiveRecord|null
      */
     public function findLastPay()
@@ -898,7 +927,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 获取指定时间内下单用户数量
-     *
      * @param $start_time
      * @param $end_time
      * @return false|string|null
@@ -917,7 +945,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 查询是否是新顾客
-     *
      * @param $member_id
      * @param $merchant_id
      * @return int
@@ -938,7 +965,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 获取订单数量、总金额、产品数量
-     *
      * @return array|\yii\db\ActiveRecord|null
      */
     public function getStatByTime($time, $select = [])
@@ -959,7 +985,6 @@ class OrderService extends \common\components\Service
 
     /**
      * 获取每天订单数量、总金额、产品数量
-     *
      * @return array|\yii\db\ActiveRecord|null
      */
     public function getDayStatByTime($time)
@@ -1029,7 +1054,7 @@ class OrderService extends \common\components\Service
             return Order::find()
                 ->select([
                     'sum(pay_money) as pay_money',
-                   // 'sum(product_count) as product_count',
+                    // 'sum(product_count) as product_count',
                     "from_unixtime(created_at, '$formatting') as time"
                 ])
                 ->where(['pay_status' => StatusEnum::ENABLED])

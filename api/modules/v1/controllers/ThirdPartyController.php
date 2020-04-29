@@ -2,6 +2,8 @@
 
 namespace addons\TinyShop\api\modules\v1\controllers;
 
+use addons\TinyShop\api\modules\v1\forms\AppleLoginForm;
+use addons\TinyShop\api\modules\v1\forms\WechatAppLoginForm;
 use Yii;
 use api\controllers\OnAuthController;
 use api\modules\v1\forms\MiniProgramLoginForm;
@@ -12,10 +14,9 @@ use yii\helpers\Json;
 
 /**
  * 第三方授权登录
- *
  * Class ThirdPartyController
  * @package addons\TinyShop\api\modules\v1\controllers
- * @author jianyan74 <751393839@qq.com>
+ * @author  jianyan74 <751393839@qq.com>
  */
 class ThirdPartyController extends OnAuthController
 {
@@ -25,14 +26,13 @@ class ThirdPartyController extends OnAuthController
      * 不用进行登录验证的方法
      * 例如： ['index', 'update', 'create', 'view', 'delete']
      * 默认全部需要验证
-     *
      * @var array
      */
-    protected $authOptional = ['wechat', 'wechat-mp', 'wechat-js-sdk'];
+    protected $authOptional = ['wechat', 'wechat-app', 'wechat-mp', 'wechat-js-sdk', 'apple'];
+
 
     /**
      * 微信登录
-     *
      * @return array|mixed
      * @throws \yii\base\Exception
      */
@@ -57,9 +57,69 @@ class ThirdPartyController extends OnAuthController
         ];
     }
 
+
+    /**
+     * 微信app授权登录
+     * @return array|mixed
+     */
+    public function actionWechatApp()
+    {
+        $model = new WechatAppLoginForm();
+        $model->attributes = Yii::$app->request->post();
+
+        if (!$model->validate()) {
+            return ResultHelper::json(422, $this->getError($model));
+        }
+
+        $auth = Yii::$app->services->memberAuth->findOauthClient(AccessTokenGroupEnum::WECHAT_APP, $model['openId']);
+        if ($auth && $auth->member) {
+            $user_info = $this->getData($auth, AccessTokenGroupEnum::APP);
+            unset($user_info['watermark']);
+
+            return [
+                'login' => true,
+                'user_info' => $user_info,
+            ];
+        }
+
+        return [
+            'login' => false,
+        ];
+    }
+
+
+    /**
+     * 苹果授权登录
+     * @return array|mixed
+     */
+    public function actionApple()
+    {
+        $model = new AppleLoginForm();
+        $model->attributes = Yii::$app->request->post();
+
+        if (!$model->validate()) {
+            return ResultHelper::json(422, $this->getError($model));
+        }
+
+        $auth = Yii::$app->services->memberAuth->findOauthClient(AccessTokenGroupEnum::IOS, $model['user']);
+        if ($auth && $auth->member) {
+            $user_info = $this->getData($auth, AccessTokenGroupEnum::APP);
+            unset($user_info['watermark']);
+
+            return [
+                'login' => true,
+                'user_info' => $user_info,
+            ];
+        }
+
+        return [
+            'login' => false,
+        ];
+    }
+
+
     /**
      * 微信小程序登录
-     *
      * @return array|mixed
      * @throws \EasyWeChat\Kernel\Exceptions\DecryptException
      * @throws \yii\base\Exception
@@ -94,7 +154,6 @@ class ThirdPartyController extends OnAuthController
 
     /**
      * 生成小程序码
-     *
      * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
      * @throws \EasyWeChat\Kernel\Exceptions\RuntimeException
      */
@@ -128,7 +187,6 @@ class ThirdPartyController extends OnAuthController
 
     /**
      * 微信jssdk
-     *
      * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
      * @throws \EasyWeChat\Kernel\Exceptions\RuntimeException
      * @throws \Psr\SimpleCache\InvalidArgumentException
@@ -152,9 +210,9 @@ class ThirdPartyController extends OnAuthController
      * @return array
      * @throws \yii\base\Exception
      */
-    protected function getData($auth)
+    protected function getData($auth, $group = AccessTokenGroupEnum::WECHAT_MQ)
     {
-        $data = Yii::$app->services->apiAccessToken->getAccessToken($auth->member, AccessTokenGroupEnum::WECHAT_MQ);
+        $data = Yii::$app->services->apiAccessToken->getAccessToken($auth->member, $group);
         // 优惠券数量
         $data['member']['coupon_num'] = Yii::$app->tinyShopService->marketingCoupon->findCountByMemberId($data['member']['id']);
         // 订单数量统计
@@ -165,10 +223,9 @@ class ThirdPartyController extends OnAuthController
 
     /**
      * 权限验证
-     *
      * @param string $action 当前的方法
-     * @param null $model 当前的模型类
-     * @param array $params $_GET变量
+     * @param null   $model  当前的模型类
+     * @param array  $params $_GET变量
      * @throws \yii\web\BadRequestHttpException
      */
     public function checkAccess($action, $model = null, $params = [])

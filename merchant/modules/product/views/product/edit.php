@@ -1,5 +1,8 @@
 <?php
 
+use addons\TinyShop\common\models\marketing\CouponType;
+use common\helpers\StringHelper;
+use kartik\datetime\DateTimePicker;
 use yii\widgets\ActiveForm;
 use common\helpers\Url;
 use yii\helpers\Url as BaseUrl;
@@ -34,6 +37,34 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="tab-content">
                 <div class="tab-pane active p-xs" id="tab_1">
                     <?= $form->field($model, 'name')->textInput(); ?>
+                    <?= $form->field($model, 'is_virtual')->radioList(WhetherEnum::getMap())->hint('卡券请选是'); ?>
+                    <div id="voucher" class="<?= $model->is_virtual == 0 ? 'hide' : ''; ?>">
+                        <?= $form->field($model, 'term_of_validity_type')->radioList(CouponType::$termOfValidityTypeExplain); ?>
+                        <div id="fixed_term" class="<?= $model->term_of_validity_type == 0 ? 'hide' : ''; ?>">
+                            <?= $form->field($model, 'fixed_term')->textInput(); ?>
+                        </div>
+                        <div id="time" class="<?= $model->term_of_validity_type == 1 ? 'hide' : ''; ?>">
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <?= $form->field($model, 'end_time', [
+                                        'template' => "{label}{input}\n{hint}\n{error}",
+                                    ])->widget(DateTimePicker::class, [
+                                        'language' => 'zh-CN',
+                                        'options' => [
+                                            'value' => StringHelper::intToDate($model->end_time),
+                                        ],
+                                        'pluginOptions' => [
+                                            'format' => 'yyyy-mm-dd hh:ii',
+                                            'todayHighlight' => true,//今日高亮
+                                            'autoclose' => true,//选择后自动关闭
+                                            'todayBtn' => true,//今日按钮显示
+                                        ],
+                                    ]); ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-sm-4">
                             <?= $form->field($model, 'cate_id')->dropDownList($cates, [
@@ -815,4 +846,27 @@ $this->params['breadcrumbs'][] = $this->title;
             $(imageObj).next().val(url);
         }
     });
+</script>
+
+<script>
+    $("input[name='ProductForm[term_of_validity_type]']").click(function () {
+        var val = $(this).val();
+        if (parseInt(val) === 1) {
+            $('#time').addClass('hide');
+            $('#fixed_term').removeClass('hide');
+        } else {
+            $('#time').removeClass('hide');
+            $('#fixed_term').addClass('hide');
+        }
+    });
+
+    $("input[name='ProductForm[is_virtual]']").click(function () {
+        var val = $(this).val();
+        if (parseInt(val) === 1) {
+            $('#voucher').removeClass('hide');
+        } else {
+            $('#voucher').addClass('hide');
+        }
+    });
+
 </script>

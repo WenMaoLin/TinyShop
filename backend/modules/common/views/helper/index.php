@@ -26,6 +26,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                     ],
                     'options' => ['class' => 'table table-hover'],
                     'columns' => [
+                        'id',
                         [
                             'attribute' => 'title',
                             'format' => 'raw',

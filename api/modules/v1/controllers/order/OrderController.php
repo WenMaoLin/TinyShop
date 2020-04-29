@@ -41,7 +41,7 @@ class OrderController extends OnAuthController
      */
     protected $handlers = [
         FullMailHandler::class,// 满包邮
-        FeeHandler::class,// 运费计算
+//        FeeHandler::class,// 运费计算
         CouponHandler::class,// 优惠券
         UsePointHandler::class,// 积分抵现
         AfterHandler::class,// 统一处理
@@ -182,6 +182,7 @@ class OrderController extends OnAuthController
         $model = $this->previewForm;
         $model->setScenario('create');
         $model->attributes = Yii::$app->request->post();
+
         $model->member = Yii::$app->tinyShopService->member->findById($identity->member_id);
 
         // 触发 - 初始化数据
@@ -189,6 +190,7 @@ class OrderController extends OnAuthController
         $initOrderData->isNewRecord = true;
         $model = $initOrderData->execute($model, $model->type);
         $model->address_id && $model->address = Yii::$app->services->memberAddress->findById($model->address_id, $identity->member_id);
+
 
         // 触发 - 营销
         $model = $this->previewHandler->start($model, true);
@@ -200,6 +202,7 @@ class OrderController extends OnAuthController
         try {
             // 订单来源
             $model->order_from = Yii::$app->user->identity->group;
+//            return ResultHelper::json(422, json_encode($model->toArray()));
             $order = Yii::$app->tinyShopService->order->create($model);
             // 消耗积分
             if ($order->point > 0) {
@@ -211,6 +214,8 @@ class OrderController extends OnAuthController
                     'remark' => '【微商城】订单支付',
                 ]));
             }
+
+
 
             // 支付金额为0 直接支付
             $order->pay_money == 0 && Yii::$app->tinyShopService->order->pay($order, $order->payment_type);

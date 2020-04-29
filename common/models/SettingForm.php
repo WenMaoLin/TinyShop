@@ -45,6 +45,13 @@ class SettingForm extends Model
     public $protocol_recharge;
 
     public $is_open_commission = 0;
+    public $merchant_commission = 100;
+    public $parent_commission = 10;
+
+    public $company_introduction;
+    public $company_tel;
+    public $company_mail;
+    public $company_address;
 
     /**
      * {@inheritdoc}
@@ -68,6 +75,8 @@ class SettingForm extends Model
                     'is_logistics',
                     'is_delivery_shop',
                     'is_open_commission',
+
+                    'company_tel',
                 ],
                 'integer',
                 'min' => 0,
@@ -75,9 +84,9 @@ class SettingForm extends Model
             [['share_title', 'share_cover', 'copyright_companyname'], 'string', 'max' => 100],
             [['share_link', 'share_desc', 'evaluate', 'copyright_logo',], 'string', 'max' => 200],
             [['share_link', 'copyright_url'], 'url'],
-            [['order_invoice_tax'], 'number', 'min' => 1, 'max' => 100],
+            [['order_invoice_tax','merchant_commission','parent_commission'], 'number', 'min' => 1, 'max' => 100],
             [['order_invoice_content', 'copyright_desc'], 'string', 'max' => 500],
-            [['protocol_register', 'protocol_privacy', 'protocol_recharge'], 'string']
+            [['company_introduction' ,'company_mail' ,'company_address', 'protocol_register', 'protocol_privacy', 'protocol_recharge'], 'string']
         ];
     }
 
@@ -115,6 +124,14 @@ class SettingForm extends Model
             'protocol_privacy' => '隐私协议',
             'protocol_recharge' => '充值协议',
             'is_open_commission' => '开启分销',
+
+            'merchant_commission' => '商家核销佣金比例(1~100)',
+            'parent_commission' => '上级用户核销分佣比例(1~100)',
+
+            'company_introduction' => '公司介绍',
+            'company_address' => '公司地址',
+            'company_tel' => '公司电话',
+            'company_mail' => '公司邮箱',
         ];
     }
 

@@ -135,5 +135,7 @@ class Application extends Service
         // 新增
         'video' => 'addons\TinyShop\services\common\VideoService',
         'store' => 'addons\TinyShop\services\common\StoreService',
+        'voucher' => 'addons\TinyShop\services\common\VoucherService',
+        'qr' => 'addons\TinyShop\services\common\QrService',
     ];
 }

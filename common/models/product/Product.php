@@ -15,7 +15,6 @@ use addons\TinyShop\common\models\order\OrderProduct;
 
 /**
  * This is the model class for table "{{%addon_shop_product}}".
- *
  * @property string $id
  * @property int $merchant_id 商家编号
  * @property string $name 商品标题
@@ -105,7 +104,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 上下架
-     *
      * @var array
      */
     public static $productStatusExplain = [
@@ -173,10 +171,12 @@ class Product extends \common\models\base\BaseModel
                     'status',
                     'created_at',
                     'updated_at',
+                    'fixed_term',
+                    'term_of_validity_type',
                 ],
                 'integer',
             ],
-            [['intro', 'posters', 'is_package', 'is_attribute'], 'string'],
+            [['intro', 'posters', 'is_package', 'is_attribute', 'end_time'], 'string'],
             [
                 [
                     'price',
@@ -282,9 +282,12 @@ class Product extends \common\models\base\BaseModel
             'is_recommend' => '推荐',
             'is_new' => '新品',
             'is_bill' => '是否开票',
-            'is_virtual' => '是否虚拟商品',
+            'is_virtual' => '是否虚拟商品(卡券)',
             'status' => '状态',
             'supplier_id' => '供货商',
+            'term_of_validity_type' => '卡券有效时间',
+            'fixed_term' => '领取之日起几天有效',
+            'end_time' => '卡券过期时间',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
@@ -292,7 +295,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 关联属性
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getAttributeValue()
@@ -305,7 +307,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 关联规格和规格值
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getSpecWithSpecValue($product_id)
@@ -321,7 +322,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 关联规格
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getSpec()
@@ -331,7 +331,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 关联规格值
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getSpecValue()
@@ -341,7 +340,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 关联sku
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getSku()
@@ -366,7 +364,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 关最小sku
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getMinPriceSku()
@@ -409,7 +406,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 关联分类
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getCate()
@@ -420,7 +416,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 关联品牌
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getBrand()
@@ -430,7 +425,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 关联评价标签
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getEvaluateStat()
@@ -440,7 +434,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 关联评价
-     *
      * @return ActiveQuery
      */
     public function getEvaluate()
@@ -472,7 +465,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 阶梯优惠
-     *
      * @return ActiveQuery
      */
     public function getLadderPreferential()
@@ -483,7 +475,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 我的收藏
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getMyCollect()
@@ -495,7 +486,6 @@ class Product extends \common\models\base\BaseModel
 
     /**
      * 我的购买总数量
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getMyGet()
@@ -526,12 +516,12 @@ class Product extends \common\models\base\BaseModel
         if (in_array($this->status, [StatusEnum::DELETE, StatusEnum::DISABLED]) || $this->product_status == StatusEnum::DISABLED) {
             Yii::$app->tinyShopService->memberCartItem->loseByProductIds([$this->id]);
         }
-
+        $this->end_time = StringHelper::dateToInt($this->end_time);
         return parent::beforeSave($insert);
     }
 
     /**
-     * @param bool $insert
+     * @param bool  $insert
      * @param array $changedAttributes
      */
     public function afterSave($insert, $changedAttributes)

@@ -286,6 +286,8 @@ class PreviewForm extends Order
             ['shipping_type', 'in', 'range' => ShippingTypeEnum::getKeys()],
             [['use_point', 'company_id'], 'integer', 'min' => 0],
             [['combination_num', 'combination_id'], 'integer', 'min' => 1],
+//            [['address_id'], 'required', 'on' => ['create']],
+            [['address_id'], 'addressVerify', 'on' => ['create']],
             [['use_point'], 'usePointVerify', 'on' => ['create']],
             [['invoice_id'], 'invoiceVerify', 'on' => ['create']],
         ];

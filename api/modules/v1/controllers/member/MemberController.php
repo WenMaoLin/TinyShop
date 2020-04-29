@@ -13,10 +13,9 @@ use addons\TinyShop\common\models\SettingForm;
 
 /**
  * 个人信息
- *
  * Class MemberController
  * @package addons\TinyShop\api\controllers
- * @author jianyan74 <751393839@qq.com>
+ * @author  jianyan74 <751393839@qq.com>
  */
 class MemberController extends OnAuthController
 {
@@ -27,7 +26,6 @@ class MemberController extends OnAuthController
 
     /**
      * 个人中心
-     *
      * @return array|null|\yii\data\ActiveDataProvider|\yii\db\ActiveRecord
      */
     public function actionIndex()
@@ -44,6 +42,7 @@ class MemberController extends OnAuthController
         $member['coupon_num'] = Yii::$app->tinyShopService->marketingCoupon->findCountByMemberId($member_id);
         // 购物车数量
         $member['cart_num'] = Yii::$app->tinyShopService->memberCartItem->count($member_id);
+
         // 订单数量统计
         $member['order_synthesize_num'] = Yii::$app->tinyShopService->order->getOrderCountGroupByMemberId($member_id);
         $member['promoter'] = '';
@@ -56,12 +55,14 @@ class MemberController extends OnAuthController
             $member['promoter'] = Yii::$app->tinyDistributionService->promoter->findByMemberId($member_id);
         }
 
+        //卡券数量
+        $member['voucher_num'] = Yii::$app->tinyShopService->voucher->findCountByMemberId($member_id);
+
         return $member;
     }
 
     /**
      * 更新
-     *
      * @param $id
      * @return bool|mixed
      * @throws NotFoundHttpException
@@ -79,10 +80,9 @@ class MemberController extends OnAuthController
 
     /**
      * 权限验证
-     *
      * @param string $action 当前的方法
-     * @param null $model 当前的模型类
-     * @param array $params $_GET变量
+     * @param null   $model  当前的模型类
+     * @param array  $params $_GET变量
      * @throws \yii\web\BadRequestHttpException
      */
     public function checkAccess($action, $model = null, $params = [])
@@ -105,5 +105,38 @@ class MemberController extends OnAuthController
         }
 
         return $model;
+    }
+
+
+    /**
+     * 填写邀请码
+     * @throws NotFoundHttpException
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function actionInvited()
+    {
+        $code = Yii::$app->request->post('code');
+        if (!$code) {
+            throw new \yii\web\BadRequestHttpException('请填写邀请码');
+        }
+        if (strlen($code) != 6) {
+            throw new \yii\web\BadRequestHttpException('请填写正确的邀请码');
+        }
+
+        return Yii::$app->tinyShopService->member->invitedByCode($this->findModel(Yii::$app->user->identity->member_id), $code);
+
+    }
+
+    /**
+     * 生成邀请二维码
+     * @return mixed
+     * @throws NotFoundHttpException
+     */
+    public function actionInvitation()
+    {
+        $member = $this->findModel(Yii::$app->user->identity->member_id);
+        $code = $member->invitation_code;
+        $qr = Yii::$app->tinyShopService->qr->createInvitation($member->invitation_code);
+        return compact('qr', 'code');
     }
 }

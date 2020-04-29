@@ -146,9 +146,9 @@ class CartItemService extends Service implements CartItemInterface
         $model->product_img = $sku['product']['picture'];
         $model->product_name = $sku['product']['name'];
 
-        if ($sku['product']['is_virtual'] == StatusEnum::ENABLED) {
-            throw new UnprocessableEntityHttpException('虚拟商品不可加入购物车');
-        }
+//        if ($sku['product']['is_virtual'] == StatusEnum::ENABLED) {
+//            throw new UnprocessableEntityHttpException('虚拟商品不可加入购物车');
+//        }
 
         if ($sku['product']['is_open_presell'] == StatusEnum::ENABLED) {
             throw new UnprocessableEntityHttpException('预售商品不可加入购物车');

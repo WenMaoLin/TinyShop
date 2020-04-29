@@ -17,8 +17,10 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                 <li><a data-toggle="tab" href="#tab-2" aria-expanded="false">支付设置</a></li>
                 <li><a data-toggle="tab" href="#tab-3" aria-expanded="false">配送设置</a></li>
                 <li><a data-toggle="tab" href="#tab-4" aria-expanded="false">发票设置</a></li>
-                <li><a data-toggle="tab" href="#tab-6" aria-expanded="false">相关协议</a></li>
-                <li><a data-toggle="tab" href="#tab-7" aria-expanded="false">版权</a></li>
+                <li><a data-toggle="tab" href="#tab-5" aria-expanded="false">相关协议</a></li>
+                <li><a data-toggle="tab" href="#tab-6" aria-expanded="false">版权</a></li>
+                <li><a data-toggle="tab" href="#tab-7" aria-expanded="false">佣金</a></li>
+                <li><a data-toggle="tab" href="#tab-8" aria-expanded="false">公司介绍</a></li>
             </ul>
             <div class="tab-content">
                 <div id="tab-1" class="tab-pane active">
@@ -66,14 +68,14 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                         <?= $form->field($model, 'order_invoice_content')->textarea(); ?>
                     </div>
                 </div>
-                <div id="tab-6" class="tab-pane">
+                <div id="tab-5" class="tab-pane">
                     <div class="panel-body">
                         <?= $form->field($model, 'protocol_register')->widget(\common\widgets\ueditor\UEditor::class); ?>
                         <?= $form->field($model, 'protocol_privacy')->widget(\common\widgets\ueditor\UEditor::class); ?>
                         <?= $form->field($model, 'protocol_recharge')->widget(\common\widgets\ueditor\UEditor::class); ?>
                     </div>
                 </div>
-                <div id="tab-7" class="tab-pane">
+                <div id="tab-6" class="tab-pane">
                     <div class="panel-body">
                         <?= $form->field($model, 'copyright_logo')->widget(Files::class, [
                             'type' => 'images',
@@ -88,6 +90,20 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                         <?= $form->field($model, 'copyright_companyname')->textInput(); ?>
                         <?= $form->field($model, 'copyright_url')->textInput(); ?>
                         <?= $form->field($model, 'copyright_desc')->textarea(); ?>
+                    </div>
+                </div>
+                <div id="tab-7" class="tab-pane">
+                    <div class="panel-body">
+                        <?= $form->field($model, 'merchant_commission')->textInput(); ?>
+                        <?= $form->field($model, 'parent_commission')->textInput(); ?>
+                    </div>
+                </div>
+                <div id="tab-8" class="tab-pane">
+                    <div class="panel-body">
+                        <?= $form->field($model, 'company_introduction')->widget(\common\widgets\ueditor\UEditor::class); ?>
+                        <?= $form->field($model, 'company_address')->textInput(); ?>
+                        <?= $form->field($model, 'company_tel')->textInput(); ?>
+                        <?= $form->field($model, 'company_mail')->textInput(); ?>
                     </div>
                 </div>
                 <div class="box-footer text-center">

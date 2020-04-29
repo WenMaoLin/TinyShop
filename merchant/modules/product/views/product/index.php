@@ -54,10 +54,11 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                                     return ['value' => $model->id];
                                 },
                             ],
-                            [
-                                'class' => 'yii\grid\SerialColumn',
-                                'visible' => true, // 不显示#
-                            ],
+//                            [
+//                                'class' => 'yii\grid\SerialColumn',
+//                                'visible' => true, // 不显示#
+//                            ],
+                            'id',
                             [
                                 'label' => '主图',
                                 'filter' => false, //不显示搜索框
@@ -65,6 +66,15 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                                     if (!empty($model->picture)) {
                                         return ImageHelper::fancyBox($model->picture);
                                     }
+                                },
+                                'format' => 'raw',
+                                'headerOptions' => ['class' => 'col-md-1'],
+                            ],
+                            [
+                                'label' => '虚拟商品(卡券)',
+                                'filter' => false, //不显示搜索框
+                                'value' => function ($model) {
+                                    return $model->is_virtual ? '<span class="label label-success is_new">卡券</span>' : '<span class="label label-danger is_new">实物</span>';
                                 },
                                 'format' => 'raw',
                                 'headerOptions' => ['class' => 'col-md-1'],
@@ -138,14 +148,21 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                             [
                                 'header' => "操作",
                                 'class' => 'yii\grid\ActionColumn',
-                                'template' => '{edit} {delete}',
+                                'template' => '{voucher} {edit} {delete}',
                                 'buttons' => [
+                                    'voucher' => function ($url, $model, $key) {
+                                        return Html::linkButton([
+                                            'voucher/index',
+                                            'product_id' => $model['id'],
+                                        ], '兑换码');
+                                    },
                                     'edit' => function ($url, $model, $key) {
                                         return Html::edit(['edit', 'id' => $model['id']]);
                                     },
                                     'delete' => function ($url, $model, $key) {
                                         return Html::delete(['delete', 'id' => $model->id]);
                                     },
+
                                 ],
                             ],
                         ],
@@ -191,9 +208,10 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                         buttons: {
                             defeat: '确定',
                         },
-                    }).then((value) => {
+                    }).then((value) = > {
                         location.reload();
-                    });
+                })
+                    ;
                 } else {
                     rfWarning(data.message);
                 }

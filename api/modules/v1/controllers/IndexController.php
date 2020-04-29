@@ -2,6 +2,7 @@
 
 namespace addons\TinyShop\api\modules\v1\controllers;
 
+use Exception;
 use Yii;
 use common\helpers\AddonHelper;
 use common\enums\StatusEnum;
@@ -25,7 +26,7 @@ class IndexController extends OnAuthController
      * 默认全部需要验证
      * @var array
      */
-    protected $authOptional = ['index'];
+    protected $authOptional = ['index', 'check-update'];
 
     /**
      * @return array|\yii\data\ActiveDataProvider
@@ -72,5 +73,57 @@ class IndexController extends OnAuthController
                 'copyright_desc' => $config['copyright_desc'] ?? '',
             ]
         ];
+    }
+
+
+    public function actionCheckUpdate($name, $version, $os)
+    {
+        $update = false;
+        $pkgUrl = false;
+        $wgtUrl = false;
+        $content = '有新的版本，是否更新';
+
+        if ($name != 'bobi-app') {
+            return compact('update');
+        }
+
+        try {
+            $app_version = file_get_contents(dirname(Yii::$app->basePath) . '/web/resources/app_version.txt');
+            $app_version_arr = explode('.', $app_version);
+            $version_arr = explode('.', $version);
+
+            switch ($os) {
+                case 'android':
+                    //大版本号或者中版本号比较旧,则安装包更新
+                    if ($version_arr[0] < $app_version_arr[0] || $version_arr[1] < $app_version_arr[1]) {
+                        $update = true;
+                        $pkgUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/resources/wgt/' . $app_version . '.apk';
+                        //小版本比较旧，则在线升级
+                    } elseif ($version_arr[2] < $app_version_arr[2]) {
+                        $update = true;
+                        $wgtUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/resources/wgt/' . $app_version . '.wgt';
+                    }
+                    break;
+                case 'ios':
+                    //版本比较旧，则更新
+                    if ($version_arr[0] < $app_version_arr[0]
+                        || $version_arr[1] < $app_version_arr[1]
+                        || $version_arr[2] < $app_version_arr[2]
+                    ) {
+                        $update = true;
+                        $pkgUrl = '苹果商店地址';
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            return compact('update', 'pkgUrl', 'wgtUrl','content');
+
+        } catch (Exception   $e) {
+            return compact('update');
+//                return $e->getMessage();
+        }
+
     }
 }

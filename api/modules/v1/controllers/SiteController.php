@@ -3,13 +3,13 @@
 namespace addons\TinyShop\api\modules\v1\controllers;
 
 use common\helpers\HashidsHelper;
+use common\enums\StatusEnum;
 use Yii;
 use yii\web\NotFoundHttpException;
 use common\helpers\ResultHelper;
 use common\helpers\ArrayHelper;
 use common\models\member\Member;
 use common\models\common\SmsLog;
-use common\enums\StatusEnum;
 use common\helpers\AddonHelper;
 use api\controllers\OnAuthController;
 use addons\TinyShop\api\modules\v1\forms\UpPwdForm;
@@ -23,7 +23,7 @@ use addons\TinyShop\common\models\SettingForm;
 /**
  * Class SiteController
  * @package addons\TinyShop\api\controllers
- * @author jianyan74 <751393839@qq.com>
+ * @author  jianyan74 <751393839@qq.com>
  */
 class SiteController extends OnAuthController
 {
@@ -31,17 +31,14 @@ class SiteController extends OnAuthController
 
     /**
      * 不用进行登录验证的方法
-     *
      * 例如： ['index', 'update', 'create', 'view', 'delete']
      * 默认全部需要验证
-     *
      * @var array
      */
     protected $authOptional = ['login', 'refresh', 'mobile-login', 'sms-code', 'register', 'up-pwd'];
 
     /**
      * 登录根据用户信息返回accessToken
-     *
      * @return array|bool
      * @throws NotFoundHttpException
      * @throws \yii\base\Exception
@@ -58,9 +55,10 @@ class SiteController extends OnAuthController
         return ResultHelper::json(422, $this->getError($model));
     }
 
+
+
     /**
      * 登出
-     *
      * @return array|mixed
      */
     public function actionLogout()
@@ -74,7 +72,6 @@ class SiteController extends OnAuthController
 
     /**
      * 重置令牌
-     *
      * @param $refresh_token
      * @return array
      * @throws NotFoundHttpException
@@ -93,7 +90,6 @@ class SiteController extends OnAuthController
 
     /**
      * 手机验证码登录
-     *
      * @return array|mixed
      * @throws \yii\base\Exception
      */
@@ -111,7 +107,6 @@ class SiteController extends OnAuthController
 
     /**
      * 获取验证码
-     *
      * @return int|mixed
      * @throws \yii\web\UnprocessableEntityHttpException
      */
@@ -123,7 +118,7 @@ class SiteController extends OnAuthController
             return ResultHelper::json(422, $this->getError($model));
         }
 
-        // 测试
+//         测试
         $code = rand(1000, 9999);
         $log = new SmsLog();
         $log = $log->loadDefaultValues();
@@ -139,12 +134,11 @@ class SiteController extends OnAuthController
         $log->save();
 
         return $code;
-        // return $model->send();
+//         return $model->send(Yii::$app->user);
     }
 
     /**
      * 注册
-     *
      * @return array|mixed
      * @throws \yii\base\Exception
      */
@@ -161,6 +155,13 @@ class SiteController extends OnAuthController
         $member = new Member();
         $member->attributes = ArrayHelper::toArray($model);
         $member->promo_code = '';
+        //放入邀请码
+        $code = substr(base_convert(md5(uniqid(md5(microtime(true)),true)), 16, 10), 0, 6);
+        while(Member::find()->where(['invitation_code'=>$code])->exists()){
+            $code = substr(base_convert(md5(uniqid(md5(microtime(true)),true)), 16, 10), 0, 6);
+        }
+        $member->invitation_code = $code;
+
         $member->merchant_id = !empty($this->getMerchantId()) ? $this->getMerchantId() : 0;
         $member->password_hash = Yii::$app->security->generatePasswordHash($model->password);
         $member->pid = $parent ? $parent->id : 0;
@@ -173,7 +174,6 @@ class SiteController extends OnAuthController
 
     /**
      * 密码重置
-     *
      * @return array|mixed
      * @throws \yii\base\Exception
      */
@@ -196,7 +196,6 @@ class SiteController extends OnAuthController
 
     /**
      * 重组数据
-     *
      * @param $data
      * @return mixed
      */
@@ -222,10 +221,9 @@ class SiteController extends OnAuthController
 
     /**
      * 权限验证
-     *
      * @param string $action 当前的方法
-     * @param null $model 当前的模型类
-     * @param array $params $_GET变量
+     * @param null   $model  当前的模型类
+     * @param array  $params $_GET变量
      * @throws \yii\web\BadRequestHttpException
      */
     public function checkAccess($action, $model = null, $params = [])
