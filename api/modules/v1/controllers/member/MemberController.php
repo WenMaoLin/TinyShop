@@ -139,4 +139,17 @@ class MemberController extends OnAuthController
         $qr = Yii::$app->tinyShopService->qr->createInvitation($member->invitation_code);
         return compact('qr', 'code');
     }
+
+
+    /**
+     * 获取旗下子用户
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    public function actionChildren()
+    {
+        return Yii::$app->tinyShopService->member->getChildren(Yii::$app->user->identity->member_id);
+    }
+
+
+
 }

@@ -41,7 +41,7 @@ class OrderController extends OnAuthController
      */
     protected $handlers = [
         FullMailHandler::class,// 满包邮
-//        FeeHandler::class,// 运费计算
+        FeeHandler::class,// 运费计算
         CouponHandler::class,// 优惠券
         UsePointHandler::class,// 积分抵现
         AfterHandler::class,// 统一处理

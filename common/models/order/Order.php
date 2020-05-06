@@ -96,7 +96,7 @@ class Order extends \common\models\base\BaseModel
     public function rules()
     {
         return [
-//            [['receiver_name', 'receiver_mobile', 'receiver_address', 'receiver_province', 'receiver_city', 'receiver_area'], 'required'],
+            [['receiver_name', 'receiver_mobile', 'receiver_address', 'receiver_province', 'receiver_city', 'receiver_area'], 'required'],
             ['receiver_mobile', 'match', 'pattern' => RegularHelper::mobile(), 'message' => '不是一个有效的手机号码'],
             [['wholesale_id', 'is_virtual', 'invoice_id', 'merchant_id', 'order_type', 'payment_type', 'shipping_type', 'buyer_id', 'receiver_province', 'receiver_city', 'receiver_area', 'seller_star', 'consign_time_adjust', 'point', 'coupon_id', 'give_point', 'order_status', 'pay_status', 'shipping_status', 'review_status', 'feedback_status', 'is_evaluate', 'company_id', 'give_point_type', 'pay_time', 'shipping_time', 'sign_time', 'consign_time', 'finish_time', 'operator_type', 'operator_id', 'status', 'created_at', 'updated_at'], 'integer'],
             [['product_money', 'user_platform_money', 'order_money', 'point_money', 'coupon_money', 'user_money', 'marketing_money', 'shipping_money', 'pay_money', 'refund_money', 'coin_money', 'give_coin', 'tax_money', 'refund_balance_money', 'product_count'], 'number'],

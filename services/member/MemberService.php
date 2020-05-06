@@ -52,7 +52,23 @@ class MemberService extends Service
         }
 
         $member->pid = $parent->id;
+        $member->invited_at = time();
         return $member->save();
     }
 
+
+    /**
+     * 获取下级用户
+     * @param $member
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    public function getChildren($member_id)
+    {
+        return Member::find()
+            ->where(['pid'=>$member_id])
+            ->select(['id','nickname', 'head_portrait', 'invited_at'])
+            ->orderBy('invited_at desc')
+            ->asArray()
+            ->all();
+    }
 }
